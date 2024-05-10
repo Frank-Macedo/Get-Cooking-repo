@@ -33,8 +33,5 @@ Get Cooking é um aplicativo inovador que ajuda você a criar deliciosas receita
 - **Expandir o banco de dados de receitas:** Incluir uma maior variedade de pratos e cozinhas internacionais.
 - **Melhorar a interface do usuário:** Otimizar a experiência do usuário para uma navegação mais fluida.
 
-## Contribuição
-Este projeto é open-source e agradecemos contribuições da comunidade. Sinta-se à vontade para enviar sugestões, reportar problemas ou enviar pull requests.
-
 ## Junte-se à comunidade Get Cooking!
 Baixe o aplicativo e comece a cozinhar hoje mesmo!
