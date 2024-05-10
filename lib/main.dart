@@ -119,9 +119,9 @@ class _MyHomePageState extends State<MyHomePage> {
               controller: _textController,
               maxLines: null, 
               decoration: const InputDecoration(
-                hintText: 'Digite o texto a ser interpretado...',
+                hintText: "Quais ingredientes que você possui?",
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 80), 
+                contentPadding: EdgeInsets.symmetric(horizontal: 60), 
 
               ),
             ),
