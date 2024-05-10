@@ -37,8 +37,9 @@ class _MyHomePageState extends State<MyHomePage> {
   final picker = ImagePicker();
 
   Future<void> pickImageFromSource(ImageSource source) async {
-    final pickedFile = await picker.pickImage(source: source, maxWidth: 300, maxHeight: 290);
-  
+    final pickedFile =
+        await picker.pickImage(source: source, maxWidth: 300, maxHeight: 290);
+
     setState(() {
       if (pickedFile != null) {
         _image = File(pickedFile.path);
@@ -114,136 +115,157 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
               ),
             ),
-        
-            TextField( // Adiciona o campo de texto para entrada do usuário
+            TextField(
+              // Adiciona o campo de texto para entrada do usuário
               controller: _textController,
-              maxLines: null, 
+              maxLines: null,
               decoration: const InputDecoration(
                 hintText: "Quais ingredientes que você possui?",
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 60), 
-
+                contentPadding: EdgeInsets.symmetric(horizontal: 60),
               ),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: enviarTextoParaInterpretacao,
               style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white, backgroundColor: Colors.green, padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                textStyle: const TextStyle(fontSize: 18), // Cor do texto do botão
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.green,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                textStyle:
+                    const TextStyle(fontSize: 18), // Cor do texto do botão
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ), // Adiciona a função de interpretação de texto
               child: const Text('Interpretar Texto'),
-            ),    const SizedBox(height: 20),
+            ),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _image != null ? enviarImagemParaInterpretacao : null,
               style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white, backgroundColor: Colors.blue, padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                textStyle: const TextStyle(fontSize: 18), // Cor do texto do botão
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.blue,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                textStyle:
+                    const TextStyle(fontSize: 18), // Cor do texto do botão
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
               child: const Text('Interpretar Imagem'),
-            ),const SizedBox(height: 20),
-            
+            ),
+            const SizedBox(height: 20),
           ],
         ),
-      ), floatingActionButton: FloatingActionButton(
+      ),
+      floatingActionButton: FloatingActionButton(
         onPressed: getImage,
         tooltip: 'Selecionar Imagem',
         child: const Icon(Icons.add_a_photo),
       ),
-     
     );
   }
 
-
-
-Future<void> enviarImagemParaInterpretacao() async {
-  if (_image != null) {
-    setState(() {
-      _respostaInterpretacao = "Interpretando..."; 
-    });
-    String resposta = await interpretarImagem(_image!);
-    setState(() {
-      _respostaInterpretacao = resposta; 
-    });
+  Future<void> enviarImagemParaInterpretacao() async {
+    if (_image != null) {
+      setState(() {
+        _respostaInterpretacao = "Interpretando...";
+      });
+      String resposta = await interpretarImagem(_image!);
+      setState(() {
+        _respostaInterpretacao = resposta;
+      });
+    }
   }
-}
 
-TextEditingController _textController = TextEditingController();
+  TextEditingController _textController = TextEditingController();
 
-Future<void> enviarTextoParaInterpretacao() async {
-   print(_textController.text);
-  if (_textController.text != "") {
-    setState(() {
-      _respostaInterpretacao = "Interpretando..."; 
-    });
-    String resposta = await interpretarTexto(_textController.text);
-    limparDados();
-    setState(() {
-      _respostaInterpretacao = resposta; 
-    });
+  Future<void> enviarTextoParaInterpretacao() async {
+    print(_textController.text);
+    if (_textController.text != "") {
+      setState(() {
+        _respostaInterpretacao = "Interpretando...";
+      });
+      String resposta = await interpretarTexto(_textController.text);
+      limparDados();
+      setState(() {
+        _respostaInterpretacao = resposta;
+      });
+    }
   }
-}
 
+  Future<String> interpretarImagem(File image) async {
+    GenerativeModel model = startUpGemini();
 
-Future<String> interpretarImagem(File image) async {
- 
-  const apiKey =  String.fromEnvironment("API_KEY");
+    // Lendo a imagem como bytes
+    final imageBytes = await image.readAsBytes();
+
+    // Criando a parte de texto
+    final prompt = TextPart(
+        "Só tenho o ingrediente da imagem, e mais nada, qual receita posso fazer? ");
+
+    // Criando a parte de imagem
+    final imagePart = DataPart('image/jpeg', imageBytes);
+
+    // Gerando o conteúdo com o modelo
+    final response = await model.generateContent([
+      Content.multi([prompt, imagePart])
+    ]);
+
+    // Retornando a resposta do modelo
+    return response.text ??
+        ''; // Adicionando um valor padrão ('') caso a resposta seja nula
+  }
+
+  GenerativeModel startUpGemini() {
+    final generationConfig = GenerationConfig(
+      temperature: 1,
+    );
+
+    final safetySettings = [
+      SafetySetting(HarmCategory.harassment, HarmBlockThreshold.high),
+      SafetySetting(HarmCategory.hateSpeech, HarmBlockThreshold.high),
+    ];
+
+    const apiKey = String.fromEnvironment("API_KEY");
     if (apiKey == "") {
-    print('No \$API_KEY environment variable');
-    exit(1);
+      exit(1);
+    }
+
+    // Instanciando o modelo generativo
+    final model = GenerativeModel(
+        model: 'gemini-pro-vision',
+        apiKey: apiKey,
+        generationConfig: generationConfig,
+        safetySettings: safetySettings);
+    return model;
   }
-  
-  // Instanciando o modelo generativo
-  final model = GenerativeModel(model: 'gemini-pro-vision', apiKey: apiKey);
 
-  // Lendo a imagem como bytes
-  final imageBytes = await image.readAsBytes();
-
-  // Criando a parte de texto
-  final prompt = TextPart("Só tenho o ingrediente da imagem, e mais nada, qual receita posso fazer? ");
-
-  // Criando a parte de imagem
-  final imagePart = DataPart('image/jpeg', imageBytes);
-
-  // Gerando o conteúdo com o modelo
-  final response = await model.generateContent([
-    Content.multi([prompt, imagePart])
-  ]);
-
-  // Retornando a resposta do modelo
-  return response.text ?? ''; // Adicionando um valor padrão ('') caso a resposta seja nula
-}
-
-Future<String> interpretarTexto(String texto) async {
- 
-  const apiKey =  String.fromEnvironment("API_KEY");
+  Future<String> interpretarTexto(String texto) async {
+    const apiKey = String.fromEnvironment("API_KEY");
     if (apiKey == "") {
-    print('No \$API_KEY environment variable');
-    exit(1);
-  }
-  
+      print('No \$API_KEY environment variable');
+      exit(1);
+    }
 
     final model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
-    final content = [Content.text("Só tenho esses ingredientes $texto  e mais nada, qual receita posso fazer?")];
+    final content = [
+      Content.text(
+          "tenho somente  $texto  e mais nada, qual receita posso fazer?")
+    ];
     final response = await model.generateContent(content);
+    return response.text ??
+        ''; // Adicionando um valor padrão ('') caso a resposta seja nula
+  }
 
-
-
-  return response.text ?? ''; // Adicionando um valor padrão ('') caso a resposta seja nula
-}
-
-
-void limparDados() {
-  setState(() {
-    _image = null;
-    _respostaInterpretacao = null;
-    _textController.clear(); // Limpar o texto do campo de texto, se houver
-  });
-}
+  void limparDados() {
+    setState(() {
+      _image = null;
+      _respostaInterpretacao = null;
+      _textController.clear(); // Limpar o texto do campo de texto, se houver
+    });
+  }
 }
