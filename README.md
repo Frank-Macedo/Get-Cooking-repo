@@ -1,4 +1,5 @@
-# Get Cooking
+# Get Cooking  
+![icone_peq](https://github.com/Frank-Macedo/Get-Cooking-repo/assets/99487848/9665d82d-a70b-4371-83a6-b66e051e05e0)
 
 ## O que é o Get Cooking?
 Get Cooking é um aplicativo inovador que ajuda você a criar deliciosas receitas com os ingredientes que já tem em casa. Tire uma foto ou digite os ingredientes disponíveis, e nosso aplicativo, alimentado por inteligência artificial, irá gerar sugestões de receitas personalizadas e passo a passo para você.
