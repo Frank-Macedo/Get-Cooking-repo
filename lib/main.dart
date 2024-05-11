@@ -230,7 +230,7 @@ class _MyHomePageState extends State<MyHomePage> {
       SafetySetting(HarmCategory.hateSpeech, HarmBlockThreshold.high),
     ];
 
-    const apiKey = "AIzaSyBED6cAvK2YC3UoPiKMvI_LGXLXBFFnJAs";
+    const apiKey = String.fromEnvironment("API_KEY");
     if (apiKey == "") {
       exit(1);
     }
