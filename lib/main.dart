@@ -198,7 +198,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<String> interpretarImagem(File image) async {
-    GenerativeModel model = startUpGemini();
+    GenerativeModel model = startUpGemini("gemini-pro-vision");
 
     // Lendo a imagem como bytes
     final imageBytes = await image.readAsBytes();
@@ -220,7 +220,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ''; // Adicionando um valor padrão ('') caso a resposta seja nula
   }
 
-  GenerativeModel startUpGemini() {
+  GenerativeModel startUpGemini(String modelType) {
     final generationConfig = GenerationConfig(
       temperature: 1,
     );
@@ -230,14 +230,14 @@ class _MyHomePageState extends State<MyHomePage> {
       SafetySetting(HarmCategory.hateSpeech, HarmBlockThreshold.high),
     ];
 
-    const apiKey = String.fromEnvironment("API_KEY");
+    const apiKey = "AIzaSyBED6cAvK2YC3UoPiKMvI_LGXLXBFFnJAs";
     if (apiKey == "") {
       exit(1);
     }
 
     // Instanciando o modelo generativo
     final model = GenerativeModel(
-        model: 'gemini-pro-vision',
+        model: modelType,
         apiKey: apiKey,
         generationConfig: generationConfig,
         safetySettings: safetySettings);
@@ -245,13 +245,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<String> interpretarTexto(String texto) async {
-    const apiKey = String.fromEnvironment("API_KEY");
-    if (apiKey == "") {
-      print('No \$API_KEY environment variable');
-      exit(1);
-    }
 
-    final model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
+    final model = startUpGemini("gemini-pro");
     final content = [
       Content.text(
           "tenho somente  $texto  e mais nada, qual receita posso fazer?")
